@@ -3,12 +3,14 @@ package org.example.restfullapi;
 import java.lang.System.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 //является входной точкой для разворачивания SpringBoot приложения
 @SpringBootApplication
+@EnableScheduling
 @RestController
 public class RestFullApiApplication {
 

@@ -1,28 +1,31 @@
 package org.example.restfullapi.config;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.time.Period;
 
-@Getter
-@Setter
+@Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Builder
+@Table(name = "Patients")
 public class Patient {
     @Id
-    @SequenceGenerator(name = "patient_sequence", sequenceName = "patient_sequence")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "patient_sequence")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "patient_id")
     private Long id;
+    @Column(name = "patient_name")
     private String name;
+    @Column(name = "patient_dob")
     private LocalDate dob;
+    @Column(name = "patient_gender")
     private String gender;
+    @Column(name = "patient_address")
     private String address;
+    @Column(name = "patients_number")
     private String number;
+    @Column(name = "patient_email")
     private String email;
 
 
