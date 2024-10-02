@@ -1,0 +1,65 @@
+services:  # Определение сервисов, которые будут запущены
+  db:  # Сервис базы данных
+    image: postgres:latest  # Используем официальный образ PostgreSQL
+    environment:  # Переменные окружения для настройки PostgreSQL
+      POSTGRES_DB: hospital  # Имя создаваемой базы данных
+      POSTGRES_USER: postgres  # Имя
+      POSTGRES_PASSWORD: root  # Пароль
+    ports:
+      - "5432:5432"
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:  # Переменные окружения для настройки Kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Указывает адрес Zookeeper
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://192.168.0.17:9093
+      # Определяет, как Kafka будет сообщать клиентам, как подключаться к брокеру.
+      # PLAINTEXT://kafka:9092 - для внутреннего подключения в кластере,
+      # PLAINTEXT_HOST://192.168.0.17:9093 - для внешнего подключения с хоста.
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093 # Определяет адреса и порты, на которых Kafka будет слушать входящие подключения.
+      # 0.0.0.0 означает, что Kafka будет слушать на всех интерфейсах.
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT # Указывает, какие протоколы безопасности использовать для каждого слушателя.
+      # В данном случае оба слушателя используют протокол PLAINTEXT (без шифрования).
+
+      ALLOW_PLAINTEXT_LISTENER: "yes"  # Разрешает использование незащищенного (PLAINTEXT) слушателя.
+      # Это полезно для разработки, но для производственной среды рекомендуется использовать защищенные соединения.
+    depends_on:
+      - zookeeper
+
+
+  zookeeper:
+    container_name: zookeeper
+    image: bitnami/zookeeper:latest
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"  # Разрешить анонимный доступ
+
+  app1:  # Первый сервис приложения
+    build:  # Определяем, как собирать образ
+      context: .  # Контекст сборки - текущая директория
+      dockerfile: Dockerfile  # Имя Dockerfile для сборки
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/hospital  # URL базы данных
+      SPRING_DATASOURCE_USERNAME: postgres  # Имя
+      SPRING_DATASOURCE_PASSWORD: root  # Пароль
+      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092  # Адрес Kafka для приложения
+    depends_on:
+      - db
+      - kafka
+
+  app2:  # Второй сервис приложения
+    build:  # Определяем, как собирать образ
+      context: ../Listeners  # Контекст сборки - директория с исходным кодом второго приложения
+      dockerfile: Dockerfile  # Имя Dockerfile для сборки
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092  # Адрес Kafka для приложения
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"

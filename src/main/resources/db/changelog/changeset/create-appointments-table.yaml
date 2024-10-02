@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-appointments
+      author: Anastasia
+      changes:
+        - createTable:
+            tableName: appointments
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: appointment_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: patient_id
+                  type: bigint
+                  constraints:
+                    nullable: false

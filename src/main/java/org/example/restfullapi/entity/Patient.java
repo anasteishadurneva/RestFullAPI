@@ -1,4 +1,4 @@
-package org.example.restfullapi.config;
+package org.example.restfullapi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

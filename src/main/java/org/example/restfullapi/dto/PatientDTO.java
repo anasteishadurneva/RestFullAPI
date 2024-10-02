@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PatientDTO {
+     Long id;
      String name;
      LocalDate dob;
      String gender;
