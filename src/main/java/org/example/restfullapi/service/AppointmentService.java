@@ -2,19 +2,23 @@ package org.example.restfullapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.restfullapi.config.AppointmentMapper;
+import org.example.restfullapi.exception.AppointmentNotFoundException;
+import org.example.restfullapi.exception.PatientNotFoundException;
+import org.example.restfullapi.mapper.AppointmentMapper;
 import org.example.restfullapi.entity.Appointment;
 import org.example.restfullapi.entity.AppointmentStatus;
 import org.example.restfullapi.dto.AppointmentDTO;
 import org.example.restfullapi.entity.Patient;
 import org.example.restfullapi.repository.AppointmentRepository;
 import org.example.restfullapi.repository.PatientRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -37,7 +41,7 @@ public class AppointmentService {
         }
 
         Patient patient = patientRepository.findById(appointmentDTO.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Пациент не найден с ID: " + appointmentDTO.getPatient().getId()));
+                .orElseThrow(() -> new PatientNotFoundException("Пациент не найден с ID: " + appointmentDTO.getPatient().getId()));
 
         // Длительность приема стандартная – 15 минут
         LocalDateTime start = appointmentDTO.getAppointmentDate();
@@ -65,39 +69,41 @@ public class AppointmentService {
     public void cancelAppointment(UUID appointmentId) {
         log.info("Отмена записи на прием с идентификатором: {}", appointmentId);
 
-        Appointment appointment = null;
-        try {
-            appointment = appointmentRepository.findById(appointmentId)
-                    .orElseThrow(ChangeSetPersister.NotFoundException::new);
-        } catch (ChangeSetPersister.NotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new AppointmentNotFoundException("Запись на прием не найдена с ID: " + appointmentId));
 
         appointment.setStatus(AppointmentStatus.CANCELLED); // Установка статуса "ОТМЕНЕНО"
         appointmentRepository.save(appointment);
     }
 
-    public List<AppointmentDTO> getAppointmentsByPatient(Long patientId) {
-        log.info("Получение всех записей на прием для пациента с идентификатором: {}", patientId);
 
-        // Получение записей на прием для конкретного пациента
-        List<Appointment> appointments = appointmentRepository.findByPatientId(patientId);
-
-        // Преобразование списка записей в список DTO с использованием toDTOList
-        return appointmentMapper.toDTOList(appointments);
+    public Page<AppointmentDTO> getAppointmentsByPatient(Patient patient, int page,int size) {
+        log.info("Получение всех записей на прием для пациента: {}", patient.getId());
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointments = appointmentRepository.findByPatient(patient, pageable);
+        return appointments.map(appointmentMapper::toDTO);
     }
 
-    public List<AppointmentDTO> getAppointmentsByDate(LocalDateTime date) {
+    public Page<AppointmentDTO> getAppointmentsByDate(LocalDate date, int page,int size) {
         log.info("Получение всех записей на прием для даты: {}", date);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointments = appointmentRepository.findByAppointmentDate(date, pageable);
+        return appointments.map(appointmentMapper::toDTO);
+    }
 
-        // Получаем начало и конец дня для фильтрации записей
-        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
-        LocalDateTime endOfDay = startOfDay.plusDays(1);
+    public long countAppointmentsForPatient(Long patientId) {
+        log.info("Получение количества записей на прием для пациента с ID: {}", patientId);
 
-        // Получение записей на прием в указанный день
-        List<Appointment> appointments = appointmentRepository.findByAppointmentDateBetween(startOfDay,endOfDay);
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Пациент не найден с ID: " + patientId));
 
-        // Преобразование списка записей в список DTO с использованием toDTOList
-        return appointmentMapper.toDTOList(appointments);
+        return appointmentRepository.countByPatient(patient);
+    }
+
+    public Page<AppointmentDTO> getAppointmentsFromDateToToday(LocalDate startDate, int page,int size) {
+        log.info("Получение всех записей на прием с даты: {} до сегодня", startDate);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointments = appointmentRepository.findAppointmentsFromDate(startDate, pageable);
+        return appointments.map(appointmentMapper::toDTO);
     }
 }

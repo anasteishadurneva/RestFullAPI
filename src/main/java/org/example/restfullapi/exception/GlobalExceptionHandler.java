@@ -28,4 +28,11 @@ public class GlobalExceptionHandler {
     public String handleGeneralException(Exception ex) {
         return ex.getMessage();
     }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    public String handleAppointmentNotFound(AppointmentNotFoundException ex) {
+        log.error("Запись на прием не найдена: {}");
+        return ex.getMessage();
+    }
 }

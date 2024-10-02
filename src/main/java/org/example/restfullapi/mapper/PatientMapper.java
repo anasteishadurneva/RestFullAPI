@@ -1,4 +1,4 @@
-package org.example.restfullapi.config;
+package org.example.restfullapi.mapper;
 
 import org.example.restfullapi.dto.PatientDTO;
 import org.example.restfullapi.entity.Patient;

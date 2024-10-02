@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("v1/patients")
 public interface PatientController {
 
+
+
     @Operation(summary = "Принимает всех пациентов", tags = "Patients")
     @ApiResponses(value = {
             @ApiResponse(
@@ -32,6 +34,8 @@ public interface PatientController {
     Page<PatientDTO> list(@RequestParam(defaultValue = "0") int page,
                           @RequestParam(defaultValue = "5") int size);
 
+
+
     @Operation(summary = "Ищет пациентов по id", tags = "Patients")
     @ApiResponses(value = {
             @ApiResponse(
@@ -45,6 +49,8 @@ public interface PatientController {
     })
     @GetMapping(path = "/{id}")
     PatientDTO getById(@PathVariable Long id);
+
+
 
     @Operation(summary = "Добавляет нового пациента", tags = "Patients")
     @ApiResponses(value = {
@@ -61,6 +67,8 @@ public interface PatientController {
     @PostMapping(path = "item")
     PatientDTO add(@RequestBody PatientDTO patient);
 
+
+
     @Operation(summary = "Удаляет пациента по идентификатору", tags = "Patients")
     @ApiResponses(value = {
             @ApiResponse(
@@ -71,6 +79,8 @@ public interface PatientController {
     })
     @DeleteMapping("/{id}")
     PatientDTO delete(@PathVariable Long id);
+
+
 
     @Operation(summary = "Обновляет существующего пациента по частям", tags = "Patients")
     @ApiResponses(value = {
@@ -87,6 +97,8 @@ public interface PatientController {
     })
     @PatchMapping(path = "item")
     PatientDTO updateByParts(@RequestBody Patient patient);
+
+
 
     @Operation(summary = "Обновляет существующего пациента", tags = "Patients")
     @ApiResponses(value = {
