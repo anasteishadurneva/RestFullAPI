@@ -2,6 +2,7 @@ package org.example.restfullapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.restfullapi.dto.AppointmentStatsDTO;
 import org.example.restfullapi.exception.AppointmentNotFoundException;
 import org.example.restfullapi.exception.PatientNotFoundException;
 import org.example.restfullapi.mapper.AppointmentMapper;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -105,5 +108,16 @@ public class AppointmentService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Appointment> appointments = appointmentRepository.findAppointmentsFromDate(startDate, pageable);
         return appointments.map(appointmentMapper::toDTO);
+    }
+
+    public List<AppointmentStatsDTO> getAppointmentStats() {
+        List<Object[]> results = appointmentRepository.countNewAppointmentsGroupedByDate();
+
+        return results.stream()
+                .map(record -> new AppointmentStatsDTO(
+                        ((java.sql.Date)record[0]).toLocalDate(),
+                        ((Number)record[1]).longValue()
+                ))
+                .collect(Collectors.toList());
     }
 }

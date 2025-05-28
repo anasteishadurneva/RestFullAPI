@@ -8,18 +8,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.restfullapi.dto.AppointmentDTO;
+import org.example.restfullapi.dto.AppointmentStatsDTO;
 import org.example.restfullapi.entity.Patient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Appointments")
 @RequestMapping("/v1/appointments")
 public interface AppointmentController {
-
-
 
     @Operation(summary = "Создает новую запись на прием", tags = "Appointments")
     @ApiResponses(value = {
@@ -115,4 +115,11 @@ public interface AppointmentController {
     Page<AppointmentDTO> getAppointmentsFromDateToToday(@PathVariable LocalDate startDate,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "5") int size);
+
+    @Operation(summary = "Получение статистики новых записей на прием по дате", tags = "Appointments")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Статистика успешно получена")
+    })
+    @GetMapping("/stats/new-appointments")
+    List<AppointmentStatsDTO> getNewAppointmentsStats();
 }

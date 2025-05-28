@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 //Методы для сохранения, обновления и удаления записей на прием
@@ -42,4 +43,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @Query("FROM Appointment a WHERE a.appointmentDate >= :startDate")
     Page<Appointment> findAppointmentsFromDate2(@Param("startDate") LocalDate startDate, Pageable pageable);
 
+    @Query(value = """
+        SELECT
+          appointment_date AS date,
+          COUNT(*) AS countNewAppointments
+        FROM appointments
+        GROUP BY appointment_date
+        ORDER BY appointment_date
+        """, nativeQuery = true)
+    List<Object[]> countNewAppointmentsGroupedByDate();
 }

@@ -3,12 +3,14 @@ package org.example.restfullapi.controller.impl;
 import lombok.RequiredArgsConstructor;
 import org.example.restfullapi.controller.AppointmentController;
 import org.example.restfullapi.dto.AppointmentDTO;
+import org.example.restfullapi.dto.AppointmentStatsDTO;
 import org.example.restfullapi.entity.Patient;
 import org.example.restfullapi.service.AppointmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -35,4 +37,7 @@ public class AppointmentControllerImpl implements AppointmentController {
 
     @Override
     public Page<AppointmentDTO> getAppointmentsFromDateToToday(LocalDate startDate, int page,int size){return appointmentService.getAppointmentsFromDateToToday(startDate, page, size);}
+
+    @Override
+    public List<AppointmentStatsDTO> getNewAppointmentsStats() {return appointmentService.getAppointmentStats();}
 }
